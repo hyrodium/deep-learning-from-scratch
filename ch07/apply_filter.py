@@ -1,37 +1,39 @@
 # coding: utf-8
-import sys, os
-sys.path.append(os.pardir)  # 親ディレクトリのファイルをインポートするための設定
-import numpy as np
+import os
 import matplotlib.pyplot as plt
 from simple_convnet import SimpleConvNet
 from matplotlib.image import imread
-from common.layers import Convolution
+from DLFS.common.layers import Convolution
+
 
 def filter_show(filters, nx=4, show_num=16):
     """
-    c.f. https://gist.github.com/aidiary/07d530d5e08011832b12#file-draw_weight-py
+    c.f.
+    https://gist.github.com/aidiary/07d530d5e08011832b12#file-draw_weight-py
     """
     FN, C, FH, FW = filters.shape
-    ny = int(np.ceil(show_num / nx))
+    # ny = int(np.ceil(show_num / nx))
 
     fig = plt.figure()
-    fig.subplots_adjust(left=0, right=1, bottom=0, top=1, hspace=0.05, wspace=0.05)
+    fig.subplots_adjust(left=0, right=1, bottom=0,
+                        top=1, hspace=0.05, wspace=0.05)
 
     for i in range(show_num):
         ax = fig.add_subplot(4, 4, i+1, xticks=[], yticks=[])
         ax.imshow(filters[i, 0], cmap=plt.cm.gray_r, interpolation='nearest')
 
 
-network = SimpleConvNet(input_dim=(1,28,28), 
-                        conv_param = {'filter_num':30, 'filter_size':5, 'pad':0, 'stride':1},
+network = SimpleConvNet(input_dim=(1, 28, 28),
+                        conv_param={'filter_num': 30,
+                                    'filter_size': 5, 'pad': 0, 'stride': 1},
                         hidden_size=100, output_size=10, weight_init_std=0.01)
 
 # 学習後の重み
-network.load_params("params.pkl")
+network.load_params(os.getcwd()+"/ch07/params.pkl")
 
 filter_show(network.params['W1'], 16)
 
-img = imread('../dataset/lena_gray.png')
+img = imread(os.getcwd()+"/dataset/lena_gray.png")
 img = img.reshape(1, 1, *img.shape)
 
 fig = plt.figure()
@@ -43,11 +45,11 @@ for i in range(16):
     b = 0  # network.params['b1'][i]
 
     w = w.reshape(1, *w.shape)
-    #b = b.reshape(1, *b.shape)
-    conv_layer = Convolution(w, b) 
+    # b = b.reshape(1, *b.shape)
+    conv_layer = Convolution(w, b)
     out = conv_layer.forward(img)
     out = out.reshape(out.shape[2], out.shape[3])
-    
+
     ax = fig.add_subplot(4, 4, i+1, xticks=[], yticks=[])
     ax.imshow(out, cmap=plt.cm.gray_r, interpolation='nearest')
 
