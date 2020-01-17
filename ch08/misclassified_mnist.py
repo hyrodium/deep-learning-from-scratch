@@ -1,21 +1,20 @@
 # coding: utf-8
-import sys, os
-sys.path.append(os.pardir)  # 親ディレクトリのファイルをインポートするための設定
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from deep_convnet import DeepConvNet
-from dataset.mnist import load_mnist
+from DLFS.dataset.mnist import load_mnist
 
 
 (x_train, t_train), (x_test, t_test) = load_mnist(flatten=False)
 
 network = DeepConvNet()
-network.load_params("deep_convnet_params.pkl")
+network.load_params(os.getcwd()+"/ch08/deep_convnet_params.pkl")
 
 print("calculating test accuracy ... ")
-#sampled = 1000
-#x_test = x_test[:sampled]
-#t_test = t_test[:sampled]
+# sampled = 1000
+# x_test = x_test[:sampled]
+# t_test = t_test[:sampled]
 
 classified_ids = []
 
@@ -29,13 +28,13 @@ for i in range(int(x_test.shape[0] / batch_size)):
     y = np.argmax(y, axis=1)
     classified_ids.append(y)
     acc += np.sum(y == tt)
-    
+
 acc = acc / x_test.shape[0]
 print("test accuracy:" + str(acc))
 
 classified_ids = np.array(classified_ids)
 classified_ids = classified_ids.flatten()
- 
+
 max_view = 20
 current_view = 1
 
@@ -46,9 +45,10 @@ mis_pairs = {}
 for i, val in enumerate(classified_ids == t_test):
     if not val:
         ax = fig.add_subplot(4, 5, current_view, xticks=[], yticks=[])
-        ax.imshow(x_test[i].reshape(28, 28), cmap=plt.cm.gray_r, interpolation='nearest')
+        ax.imshow(x_test[i].reshape(28, 28),
+                  cmap=plt.cm.gray_r, interpolation='nearest')
         mis_pairs[current_view] = (t_test[i], classified_ids[i])
-            
+
         current_view += 1
         if current_view > max_view:
             break
